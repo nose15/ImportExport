@@ -14,10 +14,23 @@ states = [
 ]
 
 
+class Warehouse(models.Model):
+    name = models.CharField(max_length=60, primary_key=True)
+
+    location_latitude = models.FloatField()
+    location_longitude = models.FloatField()
+
+
 class Route(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    origin = models.URLField()
-    destination = models.URLField()
+
+    origin_latitude = models.FloatField()
+    origin_longitude = models.FloatField()
+
+    destination_latitude = models.FloatField()
+    destination_longitude = models.FloatField()
+
+    interwarehouse = models.BooleanField()
 
     state = models.CharField(
         max_length=64
@@ -28,8 +41,17 @@ class Route(models.Model):
 
 class Car(models.Model):
     registration_number = models.CharField(max_length=7, primary_key=True)
-    space = models.IntegerField()
+    capacity = models.IntegerField()
     filled = models.IntegerField()
+
+    origin_warehouse = models.ForeignKey(
+        Warehouse,
+        related_name="Current_Car_W",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        default=None
+    )
 
     driver_id = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -59,7 +81,38 @@ class Package(models.Model):
         default=registered
     )
 
-    location = models.URLField()
+    origin_latitude = models.FloatField()
+    origin_longitude = models.FloatField()
+
+    destination_latitude = models.FloatField()
+    destination_longitude = models.FloatField()
+
+    origin_warehouse = models.ForeignKey(
+        Warehouse,
+        related_name="Origin_W",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        default=None
+    )
+
+    destination_warehouse = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name="Destination_W",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        default=None
+    )
+
+    current_warehouse = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name="Current_W",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        default=None
+    )
 
     sender_id = models.ForeignKey(
         settings.AUTH_USER_MODEL,
