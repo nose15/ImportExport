@@ -1,6 +1,7 @@
 from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseRedirect
-from . import models, forms
+from django.http import HttpResponseRedirect
+from . import models, forms, routeManager
+
 
 # Create your views here.
 
@@ -33,6 +34,8 @@ def package_send_page(response):
             )
 
             package.save()
+
+            routeManager.assign_warehouses(package)
 
             return HttpResponseRedirect("paczka/%s" % package.id)
 

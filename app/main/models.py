@@ -100,7 +100,7 @@ class Package(models.Model):
     )
 
     destination_warehouse = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        Warehouse,
         related_name="Destination_W",
         on_delete=models.CASCADE,
         null=True,
@@ -109,7 +109,7 @@ class Package(models.Model):
     )
 
     current_warehouse = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        Warehouse,
         related_name="Current_W",
         on_delete=models.CASCADE,
         null=True,
