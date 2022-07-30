@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Paczka: {{package.name}}</title>
+</head>
+<body>
+    <h1>Name: {{package.name}}</h1>
+    <p>Status: {{package.state}}</p>
+    <br />
+    <h2>Sender's data: </h2>
+    <p>Email: {{package.sender_email}}</p>
+    <p>Location: {{package.origin_latitude}}, {{package.origin_longitude}}</p>
+    <br />
+    <h2>Reciever's Data:</h2>
+    <p>Email: {{package.receiver_email}}</p>
+    <p>Location: {{package.destination_latitude}}, {{package.destination_longitude}}</p>
+    <br />
+    <h2>History: </h2>
+</body>
+</html>

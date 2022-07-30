@@ -2,10 +2,10 @@ from django.db import models
 from django.conf import settings
 import uuid
 
-registered = 'RE'
-en_route = 'ER'
-delivered = 'DE'
-at_warehouse = 'AW'
+registered = 'Registered'
+en_route = 'En Route'
+delivered = 'Delivered'
+at_warehouse = 'At warehouse'
 states = [
     (registered, 'Registered'),
     (en_route, 'En Route'),
@@ -76,10 +76,13 @@ class Package(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=60)
     state = models.CharField(
-        max_length=2,
+        max_length=60,
         choices=states,
         default=registered
     )
+
+    sender_email = models.EmailField()
+    receiver_email = models.EmailField()
 
     origin_latitude = models.FloatField()
     origin_longitude = models.FloatField()
@@ -114,24 +117,6 @@ class Package(models.Model):
         default=None
     )
 
-    sender_id = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        limit_choices_to={'groups__name': "Customers"},
-        related_name="Senders",
-        on_delete=models.CASCADE,
-        null=True,
-        default=None
-    )
-
-    reciever_id = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        limit_choices_to={'groups__name': "Customers"},
-        related_name="Recievers",
-        on_delete=models.CASCADE,
-        null=True,
-        default=None
-    )
-
     route_id = models.ForeignKey(
         Route,
         related_name="Routes",
@@ -154,7 +139,7 @@ class Package(models.Model):
 class PackageStateTransitions(models.Model):
     package_id = models.ForeignKey(Package, related_name="Packages", on_delete=models.CASCADE)
     state = models.CharField(
-        max_length=2,
+        max_length=60,
         choices=states,
         default=registered
     )
