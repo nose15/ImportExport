@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from . import models, forms, routeManager
-
+from django.conf import settings
+from django.contrib.auth.models import User
 
 # Create your views here.
 
@@ -36,6 +37,7 @@ def package_send_page(response):
             package.save()
 
             routeManager.assign_warehouses(package)
+            routeManager.set_pickup_route(driver=User.objects.get_by_natural_key("kierowca1"))
 
             return HttpResponseRedirect("paczka/%s" % package.id)
 

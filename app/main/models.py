@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.auth.models import User
 import uuid
 
 registered = 'Registered'
@@ -22,21 +23,40 @@ class Warehouse(models.Model):
 
 
 class Route(models.Model):
+    types = [
+        ('InterWarehouse', 'InterWarehouse'),
+        ('PickUp', 'PickUp'),
+        ('Delivery', 'Delivery'),
+    ]
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
-    origin_latitude = models.FloatField()
-    origin_longitude = models.FloatField()
+    duration = models.FloatField(default=0)
 
-    destination_latitude = models.FloatField()
-    destination_longitude = models.FloatField()
+    type = models.CharField(choices=types, max_length=60)
 
-    interwarehouse = models.BooleanField()
 
-    state = models.CharField(
-        max_length=64
+class DriverData(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    location_latitude = models.FloatField()
+    location_longitude = models.FloatField()
+
+    current_warehouse = models.ForeignKey(
+        Warehouse,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        default=None,
     )
 
-    length = models.FloatField(default=0)
+    route_id = models.ForeignKey(
+        Route,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        default=None,
+    )
 
 
 class Car(models.Model):
@@ -44,7 +64,9 @@ class Car(models.Model):
     capacity = models.IntegerField()
     filled = models.IntegerField()
 
-    origin_warehouse = models.ForeignKey(
+    busy = models.BooleanField(default=False)
+
+    current_warehouse = models.ForeignKey(
         Warehouse,
         related_name="Current_Car_W",
         on_delete=models.CASCADE,
