@@ -1,7 +1,7 @@
 from . import models
 import googlemaps
 
-API_key = 'AIzaSyDHFU-OcOH-r_wsQgpbKEY5Hphb8-WV7JI'
+API_key = 'hehe'
 gmaps = googlemaps.Client(key=API_key)
 
 warehouses = models.Warehouse.objects.all()
