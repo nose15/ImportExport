@@ -37,7 +37,6 @@ def package_send_page(response):
             package.save()
 
             routeManager.assign_warehouses(package)
-            routeManager.set_pickup_route(driver=User.objects.get_by_natural_key("kierowca1"))
 
             return HttpResponseRedirect("paczka/%s" % package.id)
 
