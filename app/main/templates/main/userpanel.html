@@ -1,0 +1,63 @@
+<html lang="en">
+<head>
+    {% csrf_token %}
+    {% if user.is_authenticated %}
+        <title>{{ user.username }}</title>
+    {% else %}
+        <title>Dupa</title>
+    {% endif %}
+</head>
+<body>
+    {% if user_type == 'Drivers' %}
+        <h1>Hello driver, {{ user.username }}</h1>
+        <h2>Current route: </h2>
+        {% if user.driverdata.route_id is not None %}
+            <ul>
+            {% for route_point in route_points %}
+                <li>
+                    <h3>Name: {{ route_point.name }}</h3>
+                    <p>Location: {{route_point.origin_latitude}}, {{route_point.origin_longitude}}</p>
+                    <p>
+                        {% if route_point.state == 'Registered' %}
+                            <form method="post">
+                                {% csrf_token %}
+                                <button type="submit" name="submit_package" value="{{route_point.id}}">
+                                    {% if route_type == "PickUp" %}
+                                    Picked Up
+                                    {% else %}
+                                    Delivered
+                                    {% endif %}
+                                </button>
+                            </form>
+                        {% else %}
+                            Package has been picked up!
+                        {% endif %}
+                    </p>
+                </li>
+            {% endfor %}
+            </ul>
+            <p>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="finish_route" value="finish_route">Finish Route</button>
+                </form>
+            </p>
+        {% else %}
+            <p>None</p>
+        {% endif %}
+    {% elif user_type == 'Warehouse Managers' %}
+        <h1>Hello manager, {{ user.username }}</h1>
+        <p>
+            Packages currently stored in {{ user.warehousemanagerdata.warehouse.name }} warehouse: <br />
+            {{num_of_packages}}
+        </p>
+        <form method="post">
+            {% csrf_token %}
+            <button name="assign_local_routes" value="assign_local_routes">Assign local routes</button>
+            <button name="assign_global_routes" value="assign_global_routes">Send packages to other warehouses</button>
+        </form>
+    {% else %}
+        <p>Error</p>
+    {% endif %}
+</body>
+</html>

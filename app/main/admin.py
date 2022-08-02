@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Package, PackageStateTransitions, Route, Car, Warehouse, DriverData
+from .models import Package, PackageStateTransitions, Route, Car, Warehouse, DriverData, WarehouseManagerData
 
 # Register your models here.
 admin.site.register(Package)
@@ -8,3 +8,4 @@ admin.site.register(Route)
 admin.site.register(Car)
 admin.site.register(Warehouse)
 admin.site.register(DriverData)
+admin.site.register(WarehouseManagerData)

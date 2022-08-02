@@ -7,11 +7,13 @@ registered = 'Registered'
 en_route = 'En Route'
 delivered = 'Delivered'
 at_warehouse = 'At warehouse'
+delivery_confirmed = 'Delivery Confirmed'
 states = [
     (registered, 'Registered'),
     (en_route, 'En Route'),
     (delivered, 'Delivered'),
     (at_warehouse, 'At warehouse'),
+    (delivery_confirmed, 'Delivery Confirmed')
 ]
 
 
@@ -30,10 +32,20 @@ class Route(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-
     duration = models.FloatField(default=0)
+    route_type = models.CharField(choices=types, max_length=60)
 
-    type = models.CharField(choices=types, max_length=60)
+
+class WarehouseManagerData(models.Model):
+    user = models.OneToOneField(User, blank=True, on_delete=models.CASCADE)
+
+    warehouse = models.ForeignKey(
+        Warehouse,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        default=None,
+    )
 
 
 class DriverData(models.Model):
@@ -44,7 +56,7 @@ class DriverData(models.Model):
 
     current_warehouse = models.ForeignKey(
         Warehouse,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         default=None,
@@ -52,7 +64,7 @@ class DriverData(models.Model):
 
     route_id = models.ForeignKey(
         Route,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         default=None,
@@ -69,7 +81,7 @@ class Car(models.Model):
     current_warehouse = models.ForeignKey(
         Warehouse,
         related_name="Current_Car_W",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         default=None
@@ -79,7 +91,7 @@ class Car(models.Model):
         settings.AUTH_USER_MODEL,
         limit_choices_to={'groups__name': "Drivers"},
         related_name="Drivers",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         default=None
@@ -87,7 +99,7 @@ class Car(models.Model):
 
     route_id = models.ForeignKey(
         Route,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         default=None,
@@ -115,7 +127,7 @@ class Package(models.Model):
     origin_warehouse = models.ForeignKey(
         Warehouse,
         related_name="Origin_W",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         default=None
@@ -124,7 +136,7 @@ class Package(models.Model):
     destination_warehouse = models.ForeignKey(
         Warehouse,
         related_name="Destination_W",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         default=None
@@ -133,7 +145,7 @@ class Package(models.Model):
     current_warehouse = models.ForeignKey(
         Warehouse,
         related_name="Current_W",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         default=None
@@ -142,7 +154,7 @@ class Package(models.Model):
     route_id = models.ForeignKey(
         Route,
         related_name="Routes",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         default=None
@@ -151,11 +163,38 @@ class Package(models.Model):
     car_id = models.ForeignKey(
         Car,
         related_name="Cars",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         default=None
     )
+
+    route_order = models.IntegerField(null=True, blank=True, default=None)
+
+    def submit(self):
+        if self.route_id.route_type == "PickUp":
+            self.state = en_route
+            self.car_id.filled += 1
+        else:
+            self.state = delivered
+            self.car_id.filled -= 1
+
+        self.car_id.save()
+        self.save()
+
+    def finish_route(self, warehouse):
+        if self.route_id.route_type == "PickUp":
+            self.current_warehouse = warehouse
+            self.state = at_warehouse
+            self.car_id.filled -= 1
+
+        self.car_id.save()
+
+        self.route_id = None
+        self.car_id = None
+        self.route_order = None
+
+        self.save()
 
 
 class PackageStateTransitions(models.Model):

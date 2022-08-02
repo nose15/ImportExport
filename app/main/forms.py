@@ -15,3 +15,7 @@ class CreateNewPackage(forms.Form):
 
 class PassPackageID(forms.Form):
     package_id = forms.CharField(required=True)
+
+
+class SubmitPackage(forms.Form):
+    ready = forms.BooleanField(required=True)
