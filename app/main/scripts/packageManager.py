@@ -1,4 +1,30 @@
-import models
+from .. import models
+from . import routeManager
+
+
+def new_package(form):
+    name = form.cleaned_data["package_name"]
+    sender_email = form.cleaned_data["sender_email"]
+    receiver_email = form.cleaned_data["receiver_email"]
+    origin_latitude = form.cleaned_data["origin_latitude"]
+    origin_longitude = form.cleaned_data["origin_longitude"]
+    destination_latitude = form.cleaned_data["destination_latitude"]
+    destination_longitude = form.cleaned_data["destination_longitude"]
+
+    package = models.Package(
+        name=name,
+        sender_email=sender_email,
+        receiver_email=receiver_email,
+        origin_latitude=origin_latitude,
+        origin_longitude=origin_longitude,
+        destination_latitude=destination_latitude,
+        destination_longitude=destination_longitude,
+    )
+
+    package.save()
+    routeManager.assign_warehouses(package)
+
+    return package
 
 
 def package_submit(package_id):

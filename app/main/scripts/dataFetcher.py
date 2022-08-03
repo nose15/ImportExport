@@ -1,8 +1,8 @@
 from django.http import HttpResponseRedirect
-from . import models
+from .. import models
 
 
-def fetch_routes_data(user, request):
+def fetch_routes_data(user):
     route_points = []
     route_type = None
 
@@ -24,7 +24,18 @@ def fetch_routes_data(user, request):
 
 
 def fetch_package_data(package_id):
-    pass
+    package = models.Package.objects.get(id=package_id)
+    package_data = {
+        "package": package,
+        "name": package.name,
+        "status": package.state,
+        "sender_email": package.sender_email,
+        "sender_location": (package.origin_latitude, package.origin_longitude),
+        "receiver_email": package.receiver_email,
+        "receiver_location": (package.destination_latitude, package.destination_longitude),
+    }
+
+    return package_data
 
 
 def fetch_warehouse_data(warehouse):

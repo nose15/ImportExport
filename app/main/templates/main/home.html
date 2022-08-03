@@ -5,7 +5,11 @@
     <title>Home Page</title>
 </head>
 <body>
-    <a href="package_send">Send a package</a>
-    <a href="package_check_status">Check your packages status</a>
+    <a href="wysylanie_paczki">Send a package</a>
+    <form method="POST">
+        {% csrf_token %}
+        {{form.as_p}}
+        <button type="submit">Check your packages status</button>
+    </form>
 </body>
 </html>

@@ -1,4 +1,4 @@
-from . import models
+from .. import models
 import googlemaps
 import math
 from django.contrib.auth.models import User
