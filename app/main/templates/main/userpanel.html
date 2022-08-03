@@ -18,19 +18,22 @@
                     <h3>Name: {{ route_point.name }}</h3>
                     <p>Location: {{route_point.origin_latitude}}, {{route_point.origin_longitude}}</p>
                     <p>
-                        {% if route_point.state == 'Registered' %}
+                        {% if route_point.state == 'Registered' and route_type == "PickUp"%}
                             <form method="post">
                                 {% csrf_token %}
                                 <button type="submit" name="submit_package" value="{{route_point.id}}">
-                                    {% if route_type == "PickUp" %}
                                     Picked Up
-                                    {% else %}
+                                </button>
+                            </form>
+                        {% elif route_point.state == 'En Route' and route_type == "Delivery" %}
+                            <form method="post">
+                                {% csrf_token %}
+                                <button type="submit" name="submit_package" value="{{route_point.id}}">
                                     Delivered
-                                    {% endif %}
                                 </button>
                             </form>
                         {% else %}
-                            Package has been picked up!
+                            Package has been delivered
                         {% endif %}
                     </p>
                 </li>

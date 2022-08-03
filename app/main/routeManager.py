@@ -82,8 +82,8 @@ def set_local_route(driver, car, route_type):
     route_packages = []
     packages = []
 
-    driver_location = (driver.driverdata.location_latitude, driver.driverdata.location_longitude)
-    warehouse = driver.driverdata.current_warehouse
+    driver_location = (driver.location_latitude, driver.location_longitude)
+    warehouse = driver.current_warehouse
     warehouse_coords = (warehouse.location_latitude, warehouse.location_longitude)
 
     if route_type == "PickUp":
@@ -130,7 +130,7 @@ def set_local_route(driver, car, route_type):
                 closest_package['package'].destination_longitude
             )
 
-            closest_package['package'].state = 'En route'
+            closest_package['package'].state = 'En Route'
 
         closest_package['package'].save()
 
@@ -147,15 +147,14 @@ def set_local_route(driver, car, route_type):
 
     for route_package in route_packages:
         route_package.route_id = route
-        route_package.car_id = car if route_type == "PickUp" else None
+        route_package.car_id = car
         route_package.save()
 
-    driver.driverdata.route_id = route
-    car.driver_id = driver
+    driver.route_id = route
+    car.driver_id = driver.user
     car.route_id = route
     car.filled = car_filled if route_type == "Delivery" else 0
 
-    driver.driverdata.save()
     driver.save()
     car.save()
 
@@ -217,13 +216,16 @@ def set_interwarehouse_route(origin_warehouse, destination_warehouse):
 
 def assign_local_routes(warehouse):
     packages_to_pickup = list(models.Package.objects.filter(state='Registered', origin_warehouse=warehouse, route_id=None))
-    packages_to_deliver = list(models.Package.objects.filter(state='At Warehouse', current_warehouse=warehouse, destination_warehouse=warehouse))
+    packages_to_deliver = list(models.Package.objects.filter(state='At warehouse', current_warehouse=warehouse, destination_warehouse=warehouse, route_id=None))
 
     drivers = list(models.DriverData.objects.filter(route_id=None, current_warehouse=warehouse))
-    cars = list(models.Car.objects.filter(route_id=None, driver_id=None, filled=0, current_warehouse=warehouse))
+    cars = list(models.Car.objects.filter(route_id=None, current_warehouse=warehouse))
+
+    print(drivers)
+    print(cars)
 
     while len(packages_to_pickup) != 0:
-        set_local_route(drivers[0].user, cars[0], 'PickUp')
+        set_local_route(drivers[0], cars[0], 'PickUp')
         drivers.remove(drivers[0])
         cars.remove(cars[0])
         packages_to_pickup = list(

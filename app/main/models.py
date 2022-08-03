@@ -183,7 +183,7 @@ class Package(models.Model):
         self.save()
 
     def finish_route(self, warehouse):
-        if self.route_id.route_type == "PickUp":
+        if self.route_id.route_type == "PickUp" or self.route_id.route_type == "InterWarehouse":
             self.current_warehouse = warehouse
             self.state = at_warehouse
             self.car_id.filled -= 1
