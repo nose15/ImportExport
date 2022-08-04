@@ -51,6 +51,10 @@ def package_status_page(response, package_id):
 
     # view here
 
+    if response.method == "POST":
+        if response.POST.get('confirm_delivery'):
+            packageManager.confirm_delivery(package)
+
     return render(response, "main/package.html", {"package": package})
 
 
@@ -59,7 +63,7 @@ def userpanel(request):
     user_type = user.groups.first().name
 
     if user_type == 'Drivers':
-        driver_routes_data = dataFetcher.fetch_routes_data(user, request)
+        driver_routes_data = dataFetcher.fetch_routes_data(user)
         # driver_routes_data = {'route_points': <list of Package objects>, 'route_type': <string>}
 
         # view here
@@ -94,8 +98,10 @@ def userpanel(request):
         if request.method == "POST":
             if request.POST.get('assign_local_routes'):
                 routeManager.assign_local_routes(warehouse)
+                return HttpResponseRedirect("userpanel")
             elif request.POST.get('assign_global_routes'):
                 routeManager.assign_global_routes(warehouse)
+                return HttpResponseRedirect("userpanel")
 
         return render(
             request,

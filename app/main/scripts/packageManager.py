@@ -58,3 +58,8 @@ def finish_route(user):
     user.driverdata.save()
 
 
+def confirm_delivery(package):
+    if package.state == "Delivered":
+        package.state = "Delivery Confirmed"
+
+

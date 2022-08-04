@@ -149,6 +149,7 @@ def set_local_route(driver, car, route_type):
         route_package.route_id = route
         route_package.car_id = car
         route_package.save()
+        print(route_package.route_id)
 
     driver.route_id = route
     car.driver_id = driver.user
@@ -185,7 +186,7 @@ def set_interwarehouse_route(origin_warehouse, destination_warehouse):
         package_index = 0
 
         for i in range(cars_needed):
-            car = models.Car.objects.filter(current_warehouse=origin_warehouse, busy=False).first()
+            car = models.Car.objects.filter(current_warehouse=origin_warehouse, type='truck', route_id=None, filled=0).first()
             car.save()
 
             for j in range(packages_per_car):
@@ -219,19 +220,16 @@ def assign_local_routes(warehouse):
     packages_to_deliver = list(models.Package.objects.filter(state='At warehouse', current_warehouse=warehouse, destination_warehouse=warehouse, route_id=None))
 
     drivers = list(models.DriverData.objects.filter(route_id=None, current_warehouse=warehouse))
-    cars = list(models.Car.objects.filter(route_id=None, current_warehouse=warehouse))
+    cars = list(models.Car.objects.filter(route_id=None, current_warehouse=warehouse, type='van'))
 
-    print(drivers)
-    print(cars)
-
-    while len(packages_to_pickup) != 0:
+    while len(packages_to_pickup) > 0:
         set_local_route(drivers[0], cars[0], 'PickUp')
         drivers.remove(drivers[0])
         cars.remove(cars[0])
         packages_to_pickup = list(
             models.Package.objects.filter(state='Registered', origin_warehouse=warehouse, route_id=None))
 
-    while len(packages_to_deliver) != 0:
+    while len(packages_to_deliver) > 0:
         set_local_route(drivers[0], cars[0], 'Delivery')
         drivers.remove(drivers[0])
         cars.remove(cars[0])
@@ -241,6 +239,7 @@ def assign_local_routes(warehouse):
 
 def assign_global_routes(origin_warehouse):
     warehouses_global = list(models.Warehouse.objects.exclude(name=origin_warehouse.name))
+    print(warehouses_global)
 
     for warehouse in warehouses_global:
         set_interwarehouse_route(origin_warehouse, warehouse)

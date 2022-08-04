@@ -17,5 +17,9 @@
     <p>Location: {{package.destination_latitude}}, {{package.destination_longitude}}</p>
     <br />
     <h2>History: </h2>
+    <form method="post">
+        {% csrf_token %}
+        <button name="confirm_delivery" value="confirm_delivery">Confirm Delivery</button>
+    </form>
 </body>
 </html>

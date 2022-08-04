@@ -76,7 +76,7 @@ class Car(models.Model):
     capacity = models.IntegerField()
     filled = models.IntegerField()
 
-    busy = models.BooleanField(default=False)
+    type = models.CharField(max_length=10, choices=[('van', 'van'), ('truck', 'truck')], default='van')
 
     current_warehouse = models.ForeignKey(
         Warehouse,
@@ -184,9 +184,13 @@ class Package(models.Model):
 
     def finish_route(self, warehouse):
         if self.route_id.route_type == "PickUp" or self.route_id.route_type == "InterWarehouse":
-            self.current_warehouse = warehouse
-            self.state = at_warehouse
-            self.car_id.filled -= 1
+            if self.state == "En Route":
+                self.current_warehouse = warehouse
+                self.state = at_warehouse
+                self.car_id.filled -= 1
+        else:
+            if self.state == "Delivered":
+                self.current_warehouse = None
 
         self.car_id.save()
 
