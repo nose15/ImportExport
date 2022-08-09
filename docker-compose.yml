@@ -1,0 +1,30 @@
+version: '3'
+
+volumes:
+    postgres_data: {}
+
+services:
+    db:
+        image: postgres:13
+        volumes:
+            - postgres_data:/var/lib/postgres/data
+        environment:
+            PGPASSWORD: '${DB_PASSWORD}'
+            POSTGRES_DB: '${DB_DATABASE}'
+            POSTGRES_USER: '${DB_USERNAME}'
+            POSTGRES_PASSWORD: '${DB_PASSWORD}'
+
+    django:
+        build:
+            context: .
+            dockerfile: .docker/pythone/Dockerfile
+        volumes:
+            - ./:/app/
+        command: ["python","manage.py", "runserver", "0:8000"]
+        environment:
+            - DJANGO_DB_HOST=db
+        depends_on:
+            - db
+        restart: always
+        ports:
+            - ${EXTERNAL_DJANGO_PORT:-8000}:8000
